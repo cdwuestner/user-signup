@@ -16,9 +16,34 @@
 #
 import webapp2
 
+def build_page():
+    header = "<h2>User Signup</h2>"
+
+    username_label = "<label>Username </label>"
+    username_input = "<input type='text' name='username'><br>"
+    username_form = username_label + username_input
+
+    password_label = "<label>Password </label>"
+    password_input = "<input type='password' name='password'><br>"
+    password_form = password_label + password_input
+
+    ver_pass_label = "<label>Verify Password </label>"
+    ver_pass_input = "<input type='password' name='verify'><br>"
+    ver_pass_form = ver_pass_label + ver_pass_input
+
+    email_label = "<label>Email(optional) </label>"
+    email_input = "<input type='text' name='email'><br>"
+    email_form = email_label + email_input
+
+    form = "<form>" + username_form + password_form + ver_pass_form + email_form + "</form>"
+
+    return header + form
+
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        self.response.write('Hello world!')
+        content = build_page()
+
+        self.response.write(content)
 
 app = webapp2.WSGIApplication([
     ('/', MainHandler)
