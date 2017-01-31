@@ -94,7 +94,7 @@ class MainHandler(webapp2.RequestHandler):
     def post(self):
         error = ""
 
-        username = self.request.get("username")
+        username = cgi.escape(self.request.get("username"))
 
         if len(username) < 1 or (' ' in username) == True:
             error += " invalid_user "
@@ -102,8 +102,8 @@ class MainHandler(webapp2.RequestHandler):
 
             self.redirect("/?error=" + error_escaped)
 
-        password = self.request.get("password")
-        verify = self.request.get("verify")
+        password = cgi.escape(self.request.get("password"))
+        verify = cgi.escape(self.request.get("verify"))
 
         if len(password) < 5:
             error += " short_pass "
