@@ -17,26 +17,54 @@
 import webapp2
 import cgi
 
-def build_page(error_name):
+page_header = """
+<!DOCTYPE html>
+<html>
+<head>
+    <style type="text/css">
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+"""
+
+page_footer = """
+</body>
+</html>
+"""
+
+invalid_username = "Please enter a valid username."
+
+pass_too_short = "Your password is too short."
+
+unmatching_pass = "The passwords must match."
+
+def build_page(entered_username, error_name):
     header = "<h2>User Signup</h2>"
 
     username_label = "<label>Username </label>"
-    if error_name == "Please provide a valid username.":
-        username_input = "<input type='text' name='username'>" + error_name + "<br>"
+    if "invalid_user" in error_name:
+        username_input = ("<input type='text' name='username' value='" + entered_username
+                        + "'><span class='error'>" + invalid_username + "</span><br>")
     else:
-        username_input = "<input type='text' name='username'><br>"
+        username_input = ("<input type='text' name='username' value='" + entered_username
+                        + "'><br>")
     username_form = username_label + username_input
 
     password_label = "<label>Password </label>"
-    if error_name == "Your password must contain at least 5 characters.":
-        password_input = "<input type='password' name='password'>" + error_name + "<br>"
+    if "short_pass" in error_name:
+        password_input = ("<input type='password' name='password'><span class='error'>"
+                        + pass_too_short + "</span><br>")
     else:
         password_input = "<input type='password' name='password'><br>"
     password_form = password_label + password_input
 
     ver_pass_label = "<label>Verify Password </label>"
-    if error_name == "The two passwords do not match.":
-        ver_pass_input = "<input type='password' name='password'>" + error_name + "<br>"
+    if "unmatching" in error_name:
+        ver_pass_input = ("<input type='password' name='password'><span class='error'>"
+                        + unmatching_pass + "</span><br>")
     else:
         ver_pass_input = "<input type='password' name='verify'><br>"
     ver_pass_form = ver_pass_label + ver_pass_input
@@ -50,24 +78,26 @@ def build_page(error_name):
     form = ("<form method='post'>" + username_form + password_form +
             ver_pass_form + email_form + submit_input + "</form>")
 
-    return header + form
+    return page_header + header + form + page_footer
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-
         error = self.request.get("error")
+
         if error:
-            content = build_page(cgi.escape(error, quote=True))
+            content = build_page("", cgi.escape(error, quote=True))
         else:
-            content = build_page("")
+            content = build_page("", "")
 
         self.response.write(content)
 
     def post(self):
+        error = ""
+
         username = self.request.get("username")
 
         if len(username) < 1 or (' ' in username) == True:
-            error = "Please provide a valid username."
+            error += " invalid_user "
             error_escaped = cgi.escape(error, quote=True)
 
             self.redirect("/?error=" + error_escaped)
@@ -76,18 +106,18 @@ class MainHandler(webapp2.RequestHandler):
         verify = self.request.get("verify")
 
         if len(password) < 5:
-            error = "Your password must contain at least 5 characters."
+            error += " short_pass "
             error_escaped = cgi.escape(error, quote=True)
 
             self.redirect("/?error=" + error_escaped)
 
         if password != verify:
-            error = "The two passwords do not match."
+            error += " unmatching "
             error_escaped = cgi.escape(error, quote=True)
 
             self.redirect("/?error=" + error_escaped)
 
-        content = build_page("")
+        content = page_header + "<h2>Welcome, " + username + "!</h2>" + page_footer
         self.response.write(content)
 
 app = webapp2.WSGIApplication([
