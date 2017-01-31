@@ -28,11 +28,17 @@ def build_page(error_name):
     username_form = username_label + username_input
 
     password_label = "<label>Password </label>"
-    password_input = "<input type='password' name='password'><br>"
+    if error_name == "Your password must contain at least 5 characters.":
+        password_input = "<input type='password' name='password'>" + error_name + "<br>"
+    else:
+        password_input = "<input type='password' name='password'><br>"
     password_form = password_label + password_input
 
     ver_pass_label = "<label>Verify Password </label>"
-    ver_pass_input = "<input type='password' name='verify'><br>"
+    if error_name == "The two passwords do not match.":
+        ver_pass_input = "<input type='password' name='password'>" + error_name + "<br>"
+    else:
+        ver_pass_input = "<input type='password' name='verify'><br>"
     ver_pass_form = ver_pass_label + ver_pass_input
 
     email_label = "<label>Email(optional) </label>"
@@ -62,6 +68,21 @@ class MainHandler(webapp2.RequestHandler):
 
         if len(username) < 1 or (' ' in username) == True:
             error = "Please provide a valid username."
+            error_escaped = cgi.escape(error, quote=True)
+
+            self.redirect("/?error=" + error_escaped)
+
+        password = self.request.get("password")
+        verify = self.request.get("verify")
+
+        if len(password) < 5:
+            error = "Your password must contain at least 5 characters."
+            error_escaped = cgi.escape(error, quote=True)
+
+            self.redirect("/?error=" + error_escaped)
+
+        if password != verify:
+            error = "The two passwords do not match."
             error_escaped = cgi.escape(error, quote=True)
 
             self.redirect("/?error=" + error_escaped)
