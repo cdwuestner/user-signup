@@ -15,12 +15,16 @@
 # limitations under the License.
 #
 import webapp2
+import cgi
 
-def build_page():
+def build_page(error_name):
     header = "<h2>User Signup</h2>"
 
     username_label = "<label>Username </label>"
-    username_input = "<input type='text' name='username'><br>"
+    if error_name == "Please provide a valid username.":
+        username_input = "<input type='text' name='username'>" + error_name + "<br>"
+    else:
+        username_input = "<input type='text' name='username'><br>"
     username_form = username_label + username_input
 
     password_label = "<label>Password </label>"
@@ -35,14 +39,34 @@ def build_page():
     email_input = "<input type='text' name='email'><br>"
     email_form = email_label + email_input
 
-    form = "<form>" + username_form + password_form + ver_pass_form + email_form + "</form>"
+    submit_input = "<input type='submit'>"
+
+    form = ("<form method='post'>" + username_form + password_form +
+            ver_pass_form + email_form + submit_input + "</form>")
 
     return header + form
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        content = build_page()
 
+        error = self.request.get("error")
+        if error:
+            content = build_page(cgi.escape(error, quote=True))
+        else:
+            content = build_page("")
+
+        self.response.write(content)
+
+    def post(self):
+        username = self.request.get("username")
+
+        if len(username) < 1 or (' ' in username) == True:
+            error = "Please provide a valid username."
+            error_escaped = cgi.escape(error, quote=True)
+
+            self.redirect("/?error=" + error_escaped)
+
+        content = build_page("")
         self.response.write(content)
 
 app = webapp2.WSGIApplication([
