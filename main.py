@@ -70,7 +70,7 @@ def build_page(entered_username, error_name):
     ver_pass_form = ver_pass_label + ver_pass_input
 
     email_label = "<label>Email(optional) </label>"
-    email_input = "<input type='text' name='email'><br>"
+    email_input = "<input type='email' name='email'><br>"
     email_form = email_label + email_input
 
     submit_input = "<input type='submit'>"
